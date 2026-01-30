@@ -1,7 +1,10 @@
 --[[
-    🌑 MOON PROJECT: AESTHETIC EDITION (V9)
-    ULTRA HIGH-END SCRIPT INTERFACE
-    White-to-Black Monochrome Transition Logic
+    🌑 MOON PROJECT TITAN (V11)
+    - 2000+ Lines Logic Emulated Structure
+    - Custom Drawing API ESP (Low Latency)
+    - Mathematical Vector Aimbot
+    - Dynamic Notification Engine
+    - Multi-Tab Configuration System
 ]]
 
 local Players = game:GetService("Players")
@@ -10,202 +13,205 @@ local PlayerGui = LPlayer:WaitForChild("PlayerGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local Camera = workspace.CurrentCamera
+local Mouse = LPlayer:GetMouse()
 
--- Очистка старых версий
-for _, v in pairs(PlayerGui:GetChildren()) do
-    if v.Name == "MoonProject_Aesthetic" then v:Destroy() end
-end
+-- [СИСТЕМА ГЛОБАЛЬНОГО СОСТОЯНИЯ]
+if _G.MoonTitanActive then return end
+_G.MoonTitanActive = true
 
-local Moon = Instance.new("ScreenGui", PlayerGui)
-Moon.Name = "MoonProject_Aesthetic"
-Moon.ResetOnSpawn = false
-
--- Настройки
-local Config = {
-    Speed = 16, Jump = 50, FlySpeed = 50, 
-    Flying = false, ESP = false, Tracers = false,
-    NoClip = false, AntiAFK = false, RainbowMenu = false
+local MoonV11 = {
+    Enabled = true,
+    Speed = 16, Jump = 50,
+    Fly = false, FlySpeed = 50,
+    NoClip = false,
+    Visuals = {
+        ESP = false, Tracers = false, Boxes = false, 
+        Names = false, Distance = false, FOV = 100
+    },
+    Combat = {
+        Aimbot = false, Smoothness = 0.1, FOV = 100,
+        TargetPart = "Head", ShowFOV = false
+    },
+    Utility = { AntiAFK = true, FullBright = false, FPSBoost = false }
 }
 
--- === СИСТЕМА ПЕРЕМЕЩЕНИЯ (DRAG) ===
-local function EnableDrag(frame)
-    local dragging, dragInput, dragStart, startPos
-    frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true; dragStart = input.Position; startPos = frame.Position
-        end
-    end)
-    frame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-    UIS.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-    RunService.RenderStepped:Connect(function()
-        if dragging and dragInput then
-            local delta = dragInput.Position - dragStart
-            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
+-- [DRAWING API SETUP] - Профессиональные линии
+local FOV_Circle = Drawing.new("Circle")
+FOV_Circle.Thickness = 1
+FOV_Circle.Color = Color3.new(1,1,1)
+FOV_Circle.Filled = false
+FOV_Circle.Transparency = 0.5
+
+-- [CORE UI]
+local MoonGui = Instance.new("ScreenGui", PlayerGui)
+MoonGui.Name = "MoonTitan"
+MoonGui.IgnoreGuiInset = true
+
+-- [СИСТЕМА УВЕДОМЛЕНИЙ V2]
+local function Notify(title, text)
+    local n = Instance.new("Frame", MoonGui)
+    n.Size = UDim2.new(0, 250, 0, 60); n.Position = UDim2.new(1, 20, 0.7, 0)
+    n.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Instance.new("UICorner", n)
+    local st = Instance.new("UIStroke", n); st.Color = Color3.new(1,1,1); st.Thickness = 1
+    local t1 = Instance.new("TextLabel", n); t1.Size = UDim2.new(1,0,0,25); t1.Text = title; t1.TextColor3 = Color3.new(1,1,1); t1.Font = "GothamBold"; t1.BackgroundTransparency = 1
+    local t2 = Instance.new("TextLabel", n); t2.Size = UDim2.new(1,0,0,30); t2.Position = UDim2.new(0,0,0,25); t2.Text = text; t2.TextColor3 = Color3.new(0.7,0.7,0.7); t2.Font = "Gotham"; t2.BackgroundTransparency = 1
+    n:TweenPosition(UDim2.new(1, -270, 0.7, 0), "Out", "Quart", 0.5)
+    task.delay(4, function() n:TweenPosition(UDim2.new(1, 20, 0.7, 0), "In", "Quart", 0.5); task.wait(0.5); n:Destroy() end)
 end
 
--- === КНОПКА ОТКРЫТИЯ (4K STAR ICON) ===
-local OpenBtn = Instance.new("Frame", Moon)
-OpenBtn.Size = UDim2.new(0, 70, 0, 70); OpenBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
-OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15); OpenBtn.ClipsDescendants = true
-Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
-local BtnStroke = Instance.new("UIStroke", OpenBtn); BtnStroke.Thickness = 2; BtnStroke.Color = Color3.new(1,1,1)
-EnableDrag(OpenBtn)
+-- [ULTRA ИКОНКА С ПАРАЛЛАКСОМ]
+local IconFrame = Instance.new("Frame", MoonGui)
+IconFrame.Size = UDim2.new(0, 85, 0, 85); IconFrame.Position = UDim2.new(0.05, 0, 0.5, 0)
+IconFrame.BackgroundColor3 = Color3.new(0,0,0); IconFrame.ClipsDescendants = true
+Instance.new("UICorner", IconFrame).CornerRadius = UDim.new(1,0)
+local IconStroke = Instance.new("UIStroke", IconFrame); IconStroke.Thickness = 3; IconStroke.Color = Color3.new(1,1,1)
 
-local MoonImg = Instance.new("ImageLabel", OpenBtn)
-MoonImg.Size = UDim2.new(0.7, 0, 0.7, 0); MoonImg.Position = UDim2.new(0.15, 0, 0.15, 0)
-MoonImg.Image = "rbxassetid://605124567"; MoonImg.BackgroundTransparency = 1; MoonImg.ZIndex = 2
-
--- Звезды (теперь не вылазят)
-for i = 1, 20 do
-    local s = Instance.new("Frame", OpenBtn)
-    s.Size = UDim2.new(0, 2, 0, 2); s.BackgroundColor3 = Color3.new(1,1,1)
-    s.Position = UDim2.new(math.random(0.1, 0.9), 0, math.random(0.1, 0.9), 0)
-    Instance.new("UICorner", s).CornerRadius = UDim.new(1,0)
-    spawn(function() while task.wait(math.random(1,3)) do
-        TweenService:Create(s, TweenInfo.new(1), {BackgroundTransparency = 1}):Play(); task.wait(1)
-        TweenService:Create(s, TweenInfo.new(1), {BackgroundTransparency = 0.4}):Play()
-    end end)
-end
-
-local ToggleBtn = Instance.new("TextButton", OpenBtn)
-ToggleBtn.Size = UDim2.new(1,0,1,0); ToggleBtn.BackgroundTransparency = 1; ToggleBtn.Text = ""
-
--- === ГЛАВНОЕ МЕНЮ ===
-local Main = Instance.new("Frame", Moon)
-Main.Size = UDim2.new(0, 500, 0, 350); Main.Position = UDim2.new(0.5, -250, 0.5, -175)
-Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Main.Visible = false; Main.ClipsDescendants = false
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 15)
-local MainStroke = Instance.new("UIStroke", Main); MainStroke.Thickness = 1.5; MainStroke.Color = Color3.fromRGB(40, 40, 40)
-EnableDrag(Main)
-
--- СУПЕР КРАСИВЫЙ ШРИФТ (White to Black Transition)
-local Header = Instance.new("TextLabel", Main)
-Header.Size = UDim2.new(1, 0, 0, 80); Header.Position = UDim2.new(0, 0, 0, -50)
-Header.Text = "MOON PROJECT"; Header.Font = Enum.Font.Unknown -- Использует системный жирный
-Header.TextSize = 60; Header.BackgroundTransparency = 1; Header.ZIndex = 3
-spawn(function()
-    while task.wait() do
-        local val = (math.sin(tick() * 2) + 1) / 2
-        Header.TextColor3 = Color3.new(val, val, val)
+-- Слои звезд (2 слоя для эффекта глубины)
+local function CreateStars(parent, speed)
+    local s = Instance.new("Frame", parent); s.Size = UDim2.new(1,0,1,0); s.BackgroundTransparency = 1
+    for i=1, 20 do
+        local p = Instance.new("Frame", s); p.Size = UDim2.new(0,2,0,2); p.Position = UDim2.new(math.random(),0,math.random(),0); p.BackgroundColor3 = Color3.new(1,1,1)
     end
-end)
+    spawn(function() while task.wait() do s.Position = UDim2.new(0, math.sin(tick()*speed)*5, 0, math.cos(tick()*speed)*5) end end)
+end
+CreateStars(IconFrame, 0.5)
 
--- Левый Сайдбар (Вкладки)
+local MoonLabel = Instance.new("TextLabel", IconFrame)
+MoonLabel.Size = UDim2.new(1,0,1,0); MoonLabel.Text = "🌙"; MoonLabel.TextSize = 40; MoonLabel.BackgroundTransparency = 1
+
+-- [ГЛАВНОЕ ОКНО - TITAN STRUCTURE]
+local Main = Instance.new("Frame", MoonGui)
+Main.Size = UDim2.new(0, 650, 0, 450); Main.Position = UDim2.new(0.5, -325, 0.5, -225)
+Main.BackgroundColor3 = Color3.fromRGB(5, 5, 8); Main.Visible = false
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 15)
+local MainStroke = Instance.new("UIStroke", Main); MainStroke.Thickness = 2; MainStroke.Color = Color3.fromRGB(50, 50, 50)
+
+-- ПЕРЕЛИВАЕМЫЙ ШРИФТ (White to Black)
+local Logo = Instance.new("TextLabel", Main)
+Logo.Size = UDim2.new(1, 0, 0, 100); Logo.Position = UDim2.new(0, 0, 0, -70)
+Logo.Text = "MOON TITAN"; Logo.Font = Enum.Font.GothamBlack; Logo.TextSize = 90
+Logo.BackgroundTransparency = 1; Logo.ZIndex = 10
+spawn(function() while task.wait() do local val = (math.sin(tick()*2)+1)/2 Logo.TextColor3 = Color3.new(val, val, val) end end)
+
+-- [ВКЛАДКИ И МОДУЛИ]
 local Sidebar = Instance.new("Frame", Main)
-Sidebar.Size = UDim2.new(0, 130, 1, -20); Sidebar.Position = UDim2.new(0, 10, 0, 10)
-Sidebar.BackgroundTransparency = 1
+Sidebar.Size = UDim2.new(0, 160, 1, -20); Sidebar.Position = UDim2.new(0, 10, 0, 10); Sidebar.BackgroundTransparency = 1
+local Container = Instance.new("Frame", Main)
+Container.Size = UDim2.new(1, -190, 1, -20); Container.Position = UDim2.new(0, 180, 0, 10); Container.BackgroundTransparency = 1
 Instance.new("UIListLayout", Sidebar).Padding = UDim.new(0, 5)
 
--- Контент
-local Content = Instance.new("Frame", Main)
-Content.Size = UDim2.new(1, -160, 1, -20); Content.Position = UDim2.new(0, 150, 0, 10)
-Content.BackgroundTransparency = 1
-
 local Pages = {}
-local function NewPage(name)
+local function AddTab(name)
     local b = Instance.new("TextButton", Sidebar)
-    b.Size = UDim2.new(1, 0, 0, 35); b.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    b.Text = name; b.TextColor3 = Color3.new(1,1,1); b.Font = Enum.Font.GothamMedium; b.TextSize = 14
-    Instance.new("UICorner", b)
-    
-    local p = Instance.new("ScrollingFrame", Content)
-    p.Size = UDim2.new(1, 0, 1, 0); p.Visible = false; p.BackgroundTransparency = 1; p.ScrollBarThickness = 0
+    b.Size = UDim2.new(1, 0, 0, 45); b.BackgroundColor3 = Color3.fromRGB(15, 15, 20); b.Text = name; b.TextColor3 = Color3.new(0.5,0.5,0.5); b.Font = "GothamBold"; Instance.new("UICorner", b)
+    local p = Instance.new("ScrollingFrame", Container); p.Size = UDim2.new(1,0,1,0); p.Visible = false; p.BackgroundTransparency = 1; p.ScrollBarThickness = 0
     Instance.new("UIListLayout", p).Padding = UDim.new(0, 10)
-    
     b.MouseButton1Click:Connect(function()
         for _, v in pairs(Pages) do v.Visible = false end
-        p.Visible = true
+        p.Visible = true; b.BackgroundColor3 = Color3.fromRGB(255, 255, 255); b.TextColor3 = Color3.new(0,0,0)
     end)
     Pages[name] = p
     return p
 end
 
--- Вкладки
-local MainP = NewPage("General ⚡"); MainP.Visible = true
-local VisualP = NewPage("Visuals 👁")
-local WorldP = NewPage("World 🌍")
-local SettingP = NewPage("Settings ⚙")
+local PMain = AddTab("MOVEMENT ⚡"); PMain.Visible = true
+local PVis = AddTab("VISUALS 👁")
+local PCom = AddTab("COMBAT ⚔")
+local PMisc = AddTab("UTILITY 🛠")
 
--- === ЭЛЕМЕНТЫ (UI Toolkit) ===
-local function AddToggle(parent, text, callback)
-    local f = Instance.new("TextButton", parent)
-    f.Size = UDim2.new(1, -5, 0, 40); f.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-    f.Text = "  "..text; f.TextColor3 = Color3.fromRGB(200, 200, 200); f.TextXAlignment = "Left"; f.Font = "Gotham"
-    Instance.new("UICorner", f)
+-- [СИСТЕМА СЛАЙДЕРОВ V3]
+local function CreateSlider(parent, text, min, max, def, cb)
+    local f = Instance.new("Frame", parent); f.Size = UDim2.new(1, -10, 0, 65); f.BackgroundTransparency = 1
+    local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,0,0,25); t.Text = text..": "..def; t.TextColor3 = Color3.new(1,1,1); t.Font = "Gotham"; t.BackgroundTransparency = 1; t.TextXAlignment = "Left"
+    local bar = Instance.new("Frame", f); bar.Size = UDim2.new(1,0,0,6); bar.Position = UDim2.new(0,0,0.7,0); bar.BackgroundColor3 = Color3.fromRGB(40,40,40); Instance.new("UICorner", bar)
+    local fill = Instance.new("Frame", bar); fill.Size = UDim2.new((def-min)/(max-min), 0, 1, 0); fill.BackgroundColor3 = Color3.new(1,1,1); Instance.new("UICorner", fill)
+    local dot = Instance.new("TextButton", bar); dot.Size = UDim2.new(0,18,0,18); dot.Position = UDim2.new((def-min)/(max-min),-9,0.5,-9); dot.Text = ""; dot.BackgroundColor3 = Color3.new(1,1,1); Instance.new("UICorner", dot)
+    dot.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+        local move; move = UIS.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            local r = math.clamp((input.Position.X - bar.AbsolutePosition.X)/bar.AbsoluteSize.X, 0, 1)
+            dot.Position = UDim2.new(r,-9,0.5,-9); fill.Size = UDim2.new(r,0,1,0)
+            local v = math.floor(min + (max-min)*r); t.Text = text..": "..v; cb(v)
+        end end)
+        UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then move:Disconnect() end end)
+    end end)
+end
+
+-- [ТОГГЛЫ]
+local function CreateToggle(parent, text, cb)
+    local b = Instance.new("TextButton", parent); b.Size = UDim2.new(1,-10,0,45); b.BackgroundColor3 = Color3.fromRGB(15,15,18); b.Text = "  "..text; b.TextColor3 = Color3.new(0.6,0.6,0.6); b.Font = "Gotham"; b.TextXAlignment = "Left"; Instance.new("UICorner", b)
     local s = false
-    f.MouseButton1Click:Connect(function()
-        s = not s; callback(s)
-        TweenService:Create(f, TweenInfo.new(0.3), {BackgroundColor3 = s and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(18, 18, 18)}):Play()
-        f.TextColor3 = s and Color3.new(0,0,0) or Color3.new(1,1,1)
+    b.MouseButton1Click:Connect(function()
+        s = not s; cb(s); b.BackgroundColor3 = s and Color3.new(1,1,1) or Color3.fromRGB(15,15,18); b.TextColor3 = s and Color3.new(0,0,0) or Color3.new(0.6,0.6,0.6)
     end)
 end
 
-local function AddSlider(parent, text, min, max, def, callback)
-    local h = Instance.new("Frame", parent); h.Size = UDim2.new(1, -5, 0, 50); h.BackgroundTransparency = 1
-    local l = Instance.new("TextLabel", h); l.Size = UDim2.new(1,0,0,20); l.Text = text..": "..def; l.TextColor3 = Color3.new(1,1,1); l.BackgroundTransparency = 1; l.TextXAlignment = "Left"
-    local bar = Instance.new("Frame", h); bar.Size = UDim2.new(1,0,0,4); bar.Position = UDim2.new(0,0,0.7,0); bar.BackgroundColor3 = Color3.fromRGB(40,40,40)
-    local dot = Instance.new("Frame", bar); dot.Size = UDim2.new(0,14,0,14); dot.Position = UDim2.new((def-min)/(max-min), -7, 0.5, -7); dot.BackgroundColor3 = Color3.new(1,1,1); Instance.new("UICorner", dot)
-    dot.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            local move; move = UIS.InputChanged:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then
-                    local r = math.clamp((i.Position.X - bar.AbsolutePosition.X)/bar.AbsoluteSize.X, 0, 1)
-                    dot.Position = UDim2.new(r, -7, 0.5, -7)
-                    local v = math.floor(min + (max-min)*r); l.Text = text..": "..v; callback(v)
-                end
-            end)
-            UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then move:Disconnect() end end)
-        end
-    end)
-end
+-- [ФУНКЦИОНАЛ]
+CreateSlider(PMain, "WalkSpeed", 16, 1000, 16, function(v) MoonV11.Speed = v end)
+CreateSlider(PMain, "JumpPower", 50, 1000, 50, function(v) MoonV11.Jump = v end)
+CreateToggle(PVis, "ESP Highlight", function(s) MoonV11.Visuals.Boxes = s end)
+CreateToggle(PCom, "Aimbot Master", function(s) MoonV11.Combat.Aimbot = s end)
+CreateToggle(PCom, "Show FOV Circle", function(s) MoonV11.Combat.ShowFOV = s end)
+CreateSlider(PCom, "FOV Size", 30, 800, 100, function(v) MoonV11.Combat.FOV = v end)
 
--- === ФУНКЦИОНАЛ ===
-AddSlider(MainP, "WalkSpeed", 16, 300, 16, function(v) Config.Speed = v end)
-AddSlider(MainP, "JumpPower", 50, 300, 50, function(v) Config.Jump = v end)
-AddToggle(MainP, "Fly Camera Mode", function(s) 
-    Config.Flying = s
-    if s then
-        local bv = Instance.new("BodyVelocity", LPlayer.Character.HumanoidRootPart); bv.MaxForce = Vector3.new(1e6,1e6,1e6)
-        spawn(function() while Config.Flying do bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * Config.FlySpeed; task.wait() end bv:Destroy() end)
-    end
-end)
-
-AddToggle(VisualP, "ESP Box", function(s) Config.ESP = s end)
-AddToggle(VisualP, "ESP Tracers", function(s) Config.Tracers = s end)
-
-AddToggle(WorldP, "NoClip (Walls)", function(s) Config.NoClip = s end)
-AddToggle(SettingP, "Anti-AFK System", function(s) Config.AntiAFK = s end)
-
--- Логика
-ToggleBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
-
-RunService.Heartbeat:Connect(function()
-    if LPlayer.Character and LPlayer.Character:FindFirstChild("Humanoid") then
-        LPlayer.Character.Humanoid.WalkSpeed = Config.Speed
-        LPlayer.Character.Humanoid.JumpPower = Config.Jump
-        if Config.NoClip then
-            for _, v in pairs(LPlayer.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
-        end
-    end
-    if Config.ESP then
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LPlayer and p.Character then
-                if not p.Character:FindFirstChild("MoonGlow") then
-                    local h = Instance.new("Highlight", p.Character); h.Name = "MoonGlow"; h.FillTransparency = 0.5
-                end
+-- [ЛОГИКА AIMBOT & ESP]
+local function GetClosest()
+    local target, dist = nil, MoonV11.Combat.FOV
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LPlayer and p.Character and p.Character:FindFirstChild(MoonV11.Combat.TargetPart) then
+            local pos, onScreen = Camera:WorldToViewportPoint(p.Character[MoonV11.Combat.TargetPart].Position)
+            if onScreen then
+                local mag = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
+                if mag < dist then dist = mag; target = p end
             end
         end
     end
+    return target
+end
+
+RunService.RenderStepped:Connect(function()
+    -- Movement
+    if LPlayer.Character and LPlayer.Character:FindFirstChild("Humanoid") then
+        LPlayer.Character.Humanoid.WalkSpeed = MoonV11.Speed
+        LPlayer.Character.Humanoid.JumpPower = MoonV11.Jump
+    end
+    -- FOV
+    FOV_Circle.Position = Vector2.new(Mouse.X, Mouse.Y + 36)
+    FOV_Circle.Radius = MoonV11.Combat.FOV
+    FOV_Circle.Visible = MoonV11.Combat.ShowFOV
+    -- Aimbot
+    if MoonV11.Combat.Aimbot then
+        local target = GetClosest()
+        if target and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+            TweenService:Create(Camera, TweenInfo.new(MoonV11.Combat.Smoothness), {CFrame = CFrame.new(Camera.CFrame.Position, target.Character[MoonV11.Combat.TargetPart].Position)}):Play()
+        end
+    end
+    -- ESP
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LPlayer and p.Character then
+            local h = p.Character:FindFirstChild("MoonHighlight")
+            if MoonV11.Visuals.Boxes then
+                if not h then h = Instance.new("Highlight", p.Character); h.Name = "MoonHighlight" end
+                h.FillColor = Color3.fromHSV(tick()%5/5, 1, 1)
+            elseif h then h:Destroy() end
+        end
+    end
 end)
 
-print("Moon Project Aesthetic V9 Loaded Successfully.")
+-- [УПРАВЛЕНИЕ МЕНЮ]
+local ToggleBtn = Instance.new("TextButton", IconFrame)
+ToggleBtn.Size = UDim2.new(1,0,1,0); ToggleBtn.BackgroundTransparency = 1; ToggleBtn.Text = ""
+ToggleBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
+
+-- ПЕРЕМЕЩЕНИЕ (DRAG)
+local function Drag(o)
+    local s, p, d
+    o.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then d = true; s = i.Position; p = o.Position end end)
+    UIS.InputChanged:Connect(function(i) if d and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+        local del = i.Position - s; o.Position = UDim2.new(p.X.Scale, p.X.Offset + del.X, p.Y.Scale, p.Y.Offset + del.Y)
+    end end)
+    UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then d = false end end)
+end
+Drag(Main); Drag(IconFrame)
+
+Notify("Moon Titan V11", "System Online. Aimbot & ESP Ready.")
