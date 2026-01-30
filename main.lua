@@ -1,7 +1,7 @@
 --[[
-    🌑 MOON PROJECT ULTRA V8 - PREMIUM EDITION
-    Created for: shadowv1-rgb
-    Version: 8.5.1 (Stable)
+    🌑 MOON PROJECT: AESTHETIC EDITION (V9)
+    ULTRA HIGH-END SCRIPT INTERFACE
+    White-to-Black Monochrome Transition Logic
 ]]
 
 local Players = game:GetService("Players")
@@ -10,247 +10,202 @@ local PlayerGui = LPlayer:WaitForChild("PlayerGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local VU = game:GetService("VirtualUser")
 
--- Удаление старой версии
-if PlayerGui:FindFirstChild("MoonUltra_V8") then PlayerGui.MoonUltra_V8:Destroy() end
+-- Очистка старых версий
+for _, v in pairs(PlayerGui:GetChildren()) do
+    if v.Name == "MoonProject_Aesthetic" then v:Destroy() end
+end
 
 local Moon = Instance.new("ScreenGui", PlayerGui)
-Moon.Name = "MoonUltra_V8"
+Moon.Name = "MoonProject_Aesthetic"
 Moon.ResetOnSpawn = false
 
--- === ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===
+-- Настройки
 local Config = {
-    WalkSpeed = 16,
-    JumpPower = 50,
-    FlySpeed = 50,
-    Flying = false,
-    ESP_Enabled = false,
-    ESP_Tracer = false,
-    ESP_Names = false,
-    Aimbot_Enabled = false,
-    Aimbot_Range = 200,
-    AntiAFK = false,
-    AutoFarm_Mock = false,
-    NoClip = false,
-    LowRes = false
+    Speed = 16, Jump = 50, FlySpeed = 50, 
+    Flying = false, ESP = false, Tracers = false,
+    NoClip = false, AntiAFK = false, RainbowMenu = false
 }
 
--- === УТИЛИТЫ (ФУНКЦИИ) ===
-local function MakeDraggable(obj)
+-- === СИСТЕМА ПЕРЕМЕЩЕНИЯ (DRAG) ===
+local function EnableDrag(frame)
     local dragging, dragInput, dragStart, startPos
-    obj.InputBegan:Connect(function(input)
+    frame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true; dragStart = input.Position; startPos = obj.Position
-            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+            dragging = true; dragStart = input.Position; startPos = frame.Position
         end
     end)
-    obj.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
     end)
     RunService.RenderStepped:Connect(function()
         if dragging and dragInput then
             local delta = dragInput.Position - dragStart
-            obj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
 end
 
--- === ИКОНКА 4K (Звездное небо) ===
-local OpenBtn = Instance.new("ImageButton", Moon)
-OpenBtn.Size = UDim2.new(0, 80, 0, 80); OpenBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
-OpenBtn.BackgroundColor3 = Color3.fromRGB(5, 5, 15); OpenBtn.Image = "rbxassetid://605124567"
-local BtnCorner = Instance.new("UICorner", OpenBtn); BtnCorner.CornerRadius = UDim.new(1, 0)
-local BtnStroke = Instance.new("UIStroke", OpenBtn); BtnStroke.Thickness = 3; BtnStroke.Color = Color3.new(1,1,1)
-MakeDraggable(OpenBtn)
+-- === КНОПКА ОТКРЫТИЯ (4K STAR ICON) ===
+local OpenBtn = Instance.new("Frame", Moon)
+OpenBtn.Size = UDim2.new(0, 70, 0, 70); OpenBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15); OpenBtn.ClipsDescendants = true
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
+local BtnStroke = Instance.new("UIStroke", OpenBtn); BtnStroke.Thickness = 2; BtnStroke.Color = Color3.new(1,1,1)
+EnableDrag(OpenBtn)
 
--- Эффект мерцающих звезд на иконке
+local MoonImg = Instance.new("ImageLabel", OpenBtn)
+MoonImg.Size = UDim2.new(0.7, 0, 0.7, 0); MoonImg.Position = UDim2.new(0.15, 0, 0.15, 0)
+MoonImg.Image = "rbxassetid://605124567"; MoonImg.BackgroundTransparency = 1; MoonImg.ZIndex = 2
+
+-- Звезды (теперь не вылазят)
 for i = 1, 20 do
     local s = Instance.new("Frame", OpenBtn)
-    s.Size = UDim2.new(0, math.random(1,3), 0, math.random(1,3))
-    s.Position = UDim2.new(math.random(), 0, math.random(), 0)
-    s.BackgroundColor3 = Color3.new(1,1,1); s.BackgroundTransparency = 0.5
-    spawn(function()
-        while task.wait(math.random(1,3)) do
-            TweenService:Create(s, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-            task.wait(1)
-            TweenService:Create(s, TweenInfo.new(1), {BackgroundTransparency = 0.5}):Play()
-        end
-    end)
+    s.Size = UDim2.new(0, 2, 0, 2); s.BackgroundColor3 = Color3.new(1,1,1)
+    s.Position = UDim2.new(math.random(0.1, 0.9), 0, math.random(0.1, 0.9), 0)
+    Instance.new("UICorner", s).CornerRadius = UDim.new(1,0)
+    spawn(function() while task.wait(math.random(1,3)) do
+        TweenService:Create(s, TweenInfo.new(1), {BackgroundTransparency = 1}):Play(); task.wait(1)
+        TweenService:Create(s, TweenInfo.new(1), {BackgroundTransparency = 0.4}):Play()
+    end end)
 end
 
--- === ГЛАВНЫЙ ИНТЕРФЕЙС ===
-local Main = Instance.new("Frame", Moon)
-Main.Size = UDim2.new(0, 550, 0, 400); Main.Position = UDim2.new(0.5, -275, 0.5, -200)
-Main.BackgroundColor3 = Color3.fromRGB(10, 11, 18); Main.Visible = false; Main.BorderSizePixel = 0
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 20)
-MakeDraggable(Main)
+local ToggleBtn = Instance.new("TextButton", OpenBtn)
+ToggleBtn.Size = UDim2.new(1,0,1,0); ToggleBtn.BackgroundTransparency = 1; ToggleBtn.Text = ""
 
--- Огромный RGB Шрифт
-local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 100); Title.Position = UDim2.new(0, 0, 0, -40)
-Title.Text = "MOON PROJECT"; Title.Font = Enum.Font.GothamBlack; Title.TextSize = 55
-Title.BackgroundTransparency = 1; Title.ZIndex = 5
+-- === ГЛАВНОЕ МЕНЮ ===
+local Main = Instance.new("Frame", Moon)
+Main.Size = UDim2.new(0, 500, 0, 350); Main.Position = UDim2.new(0.5, -250, 0.5, -175)
+Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Main.Visible = false; Main.ClipsDescendants = false
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 15)
+local MainStroke = Instance.new("UIStroke", Main); MainStroke.Thickness = 1.5; MainStroke.Color = Color3.fromRGB(40, 40, 40)
+EnableDrag(Main)
+
+-- СУПЕР КРАСИВЫЙ ШРИФТ (White to Black Transition)
+local Header = Instance.new("TextLabel", Main)
+Header.Size = UDim2.new(1, 0, 0, 80); Header.Position = UDim2.new(0, 0, 0, -50)
+Header.Text = "MOON PROJECT"; Header.Font = Enum.Font.Unknown -- Использует системный жирный
+Header.TextSize = 60; Header.BackgroundTransparency = 1; Header.ZIndex = 3
 spawn(function()
     while task.wait() do
-        Title.TextColor3 = Color3.fromHSV(tick() % 5 / 5, 0.7, 1)
+        local val = (math.sin(tick() * 2) + 1) / 2
+        Header.TextColor3 = Color3.new(val, val, val)
     end
 end)
 
--- Левая панель вкладок
-local SideBar = Instance.new("Frame", Main)
-SideBar.Size = UDim2.new(0, 140, 1, -20); SideBar.Position = UDim2.new(0, 10, 0, 10)
-SideBar.BackgroundTransparency = 1
-local SideList = Instance.new("UIListLayout", SideBar); SideList.Padding = UDim.new(0, 8)
+-- Левый Сайдбар (Вкладки)
+local Sidebar = Instance.new("Frame", Main)
+Sidebar.Size = UDim2.new(0, 130, 1, -20); Sidebar.Position = UDim2.new(0, 10, 0, 10)
+Sidebar.BackgroundTransparency = 1
+Instance.new("UIListLayout", Sidebar).Padding = UDim.new(0, 5)
 
--- Контейнер для страниц
-local Container = Instance.new("Frame", Main)
-Container.Size = UDim2.new(1, -165, 1, -20); Container.Position = UDim2.new(0, 155, 0, 10)
-Container.BackgroundTransparency = 1
+-- Контент
+local Content = Instance.new("Frame", Main)
+Content.Size = UDim2.new(1, -160, 1, -20); Content.Position = UDim2.new(0, 150, 0, 10)
+Content.BackgroundTransparency = 1
 
 local Pages = {}
-local function CreatePage(name, icon)
-    local btn = Instance.new("TextButton", SideBar)
-    btn.Size = UDim2.new(1, 0, 0, 40); btn.Text = "  " .. name; btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14; btn.TextColor3 = Color3.new(0.8, 0.8, 0.8); btn.TextXAlignment = "Left"
-    btn.BackgroundColor3 = Color3.fromRGB(25, 27, 45); Instance.new("UICorner", btn)
+local function NewPage(name)
+    local b = Instance.new("TextButton", Sidebar)
+    b.Size = UDim2.new(1, 0, 0, 35); b.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    b.Text = name; b.TextColor3 = Color3.new(1,1,1); b.Font = Enum.Font.GothamMedium; b.TextSize = 14
+    Instance.new("UICorner", b)
     
-    local pg = Instance.new("ScrollingFrame", Container)
-    pg.Size = UDim2.new(1, 0, 1, 0); pg.Visible = false; pg.BackgroundTransparency = 1
-    pg.ScrollBarThickness = 2; pg.CanvasSize = UDim2.new(0,0,2,0)
-    Instance.new("UIListLayout", pg).Padding = UDim.new(0, 10)
+    local p = Instance.new("ScrollingFrame", Content)
+    p.Size = UDim2.new(1, 0, 1, 0); p.Visible = false; p.BackgroundTransparency = 1; p.ScrollBarThickness = 0
+    Instance.new("UIListLayout", p).Padding = UDim.new(0, 10)
     
-    btn.MouseButton1Click:Connect(function()
+    b.MouseButton1Click:Connect(function()
         for _, v in pairs(Pages) do v.Visible = false end
-        pg.Visible = true
-        for _, b in pairs(SideBar:GetChildren()) do if b:IsA("TextButton") then b.BackgroundColor3 = Color3.fromRGB(25,27,45) end end
-        btn.BackgroundColor3 = Color3.fromRGB(60, 80, 200)
+        p.Visible = true
     end)
-    Pages[name] = pg
-    return pg
+    Pages[name] = p
+    return p
 end
 
-local PMain = CreatePage("Main 🏠")
-local PVis = CreatePage("Visuals 👁")
-local PCom = CreatePage("Combat ⚔")
-local PWor = CreatePage("World 🌍")
-local PTele = CreatePage("Teleport 📍")
-local PSet = CreatePage("Settings ⚙")
-PMain.Visible = true
+-- Вкладки
+local MainP = NewPage("General ⚡"); MainP.Visible = true
+local VisualP = NewPage("Visuals 👁")
+local WorldP = NewPage("World 🌍")
+local SettingP = NewPage("Settings ⚙")
 
--- === ЭЛЕМЕНТЫ КОНСТРУКТОРА ===
-
-local function AddSlider(parent, text, min, max, def, cb)
-    local f = Instance.new("Frame", parent); f.Size = UDim2.new(1, -10, 0, 55); f.BackgroundTransparency = 1
-    local l = Instance.new("TextLabel", f); l.Size = UDim2.new(1, 0, 0, 20); l.Text = text .. ": " .. def
-    l.TextColor3 = Color3.new(1, 1, 1); l.BackgroundTransparency = 1; l.TextXAlignment = "Left"
-    local b = Instance.new("Frame", f); b.Size = UDim2.new(1, 0, 0, 5); b.Position = UDim2.new(0, 0, 0.75, 0)
-    b.BackgroundColor3 = Color3.fromRGB(45, 48, 70); Instance.new("UICorner", b)
-    local d = Instance.new("TextButton", b); d.Size = UDim2.new(0, 16, 0, 16); d.Position = UDim2.new((def-min)/(max-min), -8, 0.5, -8)
-    d.Text = ""; d.BackgroundColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", d)
-    d.MouseButton1Down:Connect(function()
-        local move; move = UIS.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-                local r = math.clamp((input.Position.X - b.AbsolutePosition.X) / b.AbsoluteSize.X, 0, 1)
-                d.Position = UDim2.new(r, -8, 0.5, -8)
-                local val = math.floor(min + (max-min)*r); l.Text = text .. ": " .. val; cb(val)
-            end
-        end)
-        UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then move:Disconnect() end end)
+-- === ЭЛЕМЕНТЫ (UI Toolkit) ===
+local function AddToggle(parent, text, callback)
+    local f = Instance.new("TextButton", parent)
+    f.Size = UDim2.new(1, -5, 0, 40); f.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+    f.Text = "  "..text; f.TextColor3 = Color3.fromRGB(200, 200, 200); f.TextXAlignment = "Left"; f.Font = "Gotham"
+    Instance.new("UICorner", f)
+    local s = false
+    f.MouseButton1Click:Connect(function()
+        s = not s; callback(s)
+        TweenService:Create(f, TweenInfo.new(0.3), {BackgroundColor3 = s and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(18, 18, 18)}):Play()
+        f.TextColor3 = s and Color3.new(0,0,0) or Color3.new(1,1,1)
     end)
 end
 
-local function AddToggle(parent, text, cb)
-    local t = Instance.new("TextButton", parent)
-    t.Size = UDim2.new(1, -10, 0, 45); t.BackgroundColor3 = Color3.fromRGB(22, 24, 38)
-    t.Text = "   " .. text; t.TextColor3 = Color3.new(0.8, 0.8, 0.8); t.TextXAlignment = "Left"; Instance.new("UICorner", t)
-    local box = Instance.new("Frame", t); box.Size = UDim2.new(0, 34, 0, 18); box.Position = UDim2.new(1, -45, 0.5, -9)
-    box.BackgroundColor3 = Color3.fromRGB(40, 42, 60); Instance.new("UICorner", box).CornerRadius = UDim.new(1, 0)
-    local dot = Instance.new("Frame", box); dot.Size = UDim2.new(0, 14, 0, 14); dot.Position = UDim2.new(0, 2, 0.5, -7)
-    dot.BackgroundColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
-    local state = false
-    t.MouseButton1Click:Connect(function()
-        state = not state
-        box.BackgroundColor3 = state and Color3.fromRGB(50, 200, 120) or Color3.fromRGB(40, 42, 60)
-        dot:TweenPosition(state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7), "Out", "Quad", 0.2)
-        cb(state)
+local function AddSlider(parent, text, min, max, def, callback)
+    local h = Instance.new("Frame", parent); h.Size = UDim2.new(1, -5, 0, 50); h.BackgroundTransparency = 1
+    local l = Instance.new("TextLabel", h); l.Size = UDim2.new(1,0,0,20); l.Text = text..": "..def; l.TextColor3 = Color3.new(1,1,1); l.BackgroundTransparency = 1; l.TextXAlignment = "Left"
+    local bar = Instance.new("Frame", h); bar.Size = UDim2.new(1,0,0,4); bar.Position = UDim2.new(0,0,0.7,0); bar.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    local dot = Instance.new("Frame", bar); dot.Size = UDim2.new(0,14,0,14); dot.Position = UDim2.new((def-min)/(max-min), -7, 0.5, -7); dot.BackgroundColor3 = Color3.new(1,1,1); Instance.new("UICorner", dot)
+    dot.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            local move; move = UIS.InputChanged:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then
+                    local r = math.clamp((i.Position.X - bar.AbsolutePosition.X)/bar.AbsoluteSize.X, 0, 1)
+                    dot.Position = UDim2.new(r, -7, 0.5, -7)
+                    local v = math.floor(min + (max-min)*r); l.Text = text..": "..v; callback(v)
+                end
+            end)
+            UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then move:Disconnect() end end)
+        end
     end)
 end
 
-local function AddButton(parent, text, cb)
-    local b = Instance.new("TextButton", parent)
-    b.Size = UDim2.new(1, -10, 0, 40); b.BackgroundColor3 = Color3.fromRGB(35, 38, 60)
-    b.Text = text; b.TextColor3 = Color3.new(1, 1, 1); b.Font = "GothamBold"; Instance.new("UICorner", b)
-    b.MouseButton1Click:Connect(cb)
-end
-
--- === НАПОЛНЕНИЕ ВКЛАДОК ===
-
--- MAIN
-AddSlider(PMain, "Walk Speed", 16, 500, 16, function(v) Config.WalkSpeed = v end)
-AddSlider(PMain, "Jump Power", 50, 500, 50, function(v) Config.JumpPower = v end)
-AddToggle(PMain, "Enable Fly", function(s) 
+-- === ФУНКЦИОНАЛ ===
+AddSlider(MainP, "WalkSpeed", 16, 300, 16, function(v) Config.Speed = v end)
+AddSlider(MainP, "JumpPower", 50, 300, 50, function(v) Config.Jump = v end)
+AddToggle(MainP, "Fly Camera Mode", function(s) 
     Config.Flying = s
     if s then
-        local bv = Instance.new("BodyVelocity", LPlayer.Character.HumanoidRootPart); bv.Name = "MoonFly"
-        bv.MaxForce = Vector3.new(1e6,1e6,1e6); spawn(function() while Config.Flying do bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * Config.FlySpeed; task.wait() end bv:Destroy() end)
-    end
-end)
-AddSlider(PMain, "Fly Speed", 10, 500, 50, function(v) Config.FlySpeed = v end)
-
--- VISUALS
-AddToggle(PVis, "ESP Players (Boxes)", function(s) Config.ESP_Enabled = s end)
-AddToggle(PVis, "ESP Tracers", function(s) Config.ESP_Tracer = s end)
-AddToggle(PVis, "Show Names", function(s) Config.ESP_Names = s end)
-
--- COMBAT
-AddToggle(PCom, "Silent Aim (Beta)", function(s) Config.Aimbot_Enabled = s end)
-AddSlider(PCom, "Aim Range", 50, 1000, 200, function(v) Config.Aimbot_Range = v end)
-
--- WORLD
-AddToggle(PWor, "NoClip", function(s) Config.NoClip = s end)
-AddButton(PWor, "Full Bright", function() game:GetService("Lighting").Brightness = 2; game:GetService("Lighting").ClockTime = 14 end)
-
--- TELEPORT
-AddButton(PTele, "Teleport to Random Player", function()
-    local all = Players:GetPlayers()
-    local rand = all[math.random(1, #all)]
-    if rand ~= LPlayer and rand.Character then LPlayer.Character:MoveTo(rand.Character.HumanoidRootPart.Position) end
-end)
-
--- SETTINGS
-AddToggle(PSet, "Anti-AFK", function(s) Config.AntiAFK = s end)
-AddButton(PSet, "FPS Booster", function() 
-    for _, v in pairs(workspace:GetDescendants()) do 
-        if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end 
+        local bv = Instance.new("BodyVelocity", LPlayer.Character.HumanoidRootPart); bv.MaxForce = Vector3.new(1e6,1e6,1e6)
+        spawn(function() while Config.Flying do bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * Config.FlySpeed; task.wait() end bv:Destroy() end)
     end
 end)
 
--- === ЛОГИКА И ЦИКЛЫ ===
-RunService.Stepped:Connect(function()
+AddToggle(VisualP, "ESP Box", function(s) Config.ESP = s end)
+AddToggle(VisualP, "ESP Tracers", function(s) Config.Tracers = s end)
+
+AddToggle(WorldP, "NoClip (Walls)", function(s) Config.NoClip = s end)
+AddToggle(SettingP, "Anti-AFK System", function(s) Config.AntiAFK = s end)
+
+-- Логика
+ToggleBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
+
+RunService.Heartbeat:Connect(function()
     if LPlayer.Character and LPlayer.Character:FindFirstChild("Humanoid") then
-        LPlayer.Character.Humanoid.WalkSpeed = Config.WalkSpeed
-        LPlayer.Character.Humanoid.JumpPower = Config.JumpPower
+        LPlayer.Character.Humanoid.WalkSpeed = Config.Speed
+        LPlayer.Character.Humanoid.JumpPower = Config.Jump
         if Config.NoClip then
-            for _, v in pairs(LPlayer.Character:GetDescendants()) do
-                if v:IsA("BasePart") then v.CanCollide = false end
-            end
+            for _, v in pairs(LPlayer.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
         end
     end
-    -- ESP Logic
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LPlayer and p.Character then
-            if Config.ESP_Enabled then
-                if not p.Character:FindFirstChild("MoonHighlight") then
-                    local h = Instance.new("Highlight", p.Character); h.Name = "MoonHighlight"
-                    h.FillColor = Color3.fromHSV(tick()%5/5, 1, 1)
+    if Config.ESP then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LPlayer and p.Character then
+                if not p.Character:FindFirstChild("MoonGlow") then
+                    local h = Instance.new("Highlight", p.Character); h.Name = "MoonGlow"; h.FillTransparency = 0.5
                 end
-            else
-                if p.Character:FindFirstChild("MoonHighlight") then p.Character.MoonHighlight:Destroy() end
             end
         end
     end
 end)
 
-OpenBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
-print("MOON PROJECT V8: FULLY LOADED. 1000+ Lines Logic Emulated.")
+print("Moon Project Aesthetic V9 Loaded Successfully.")
