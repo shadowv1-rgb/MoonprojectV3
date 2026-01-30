@@ -1,8 +1,9 @@
--- Moon Project 🌑 V3 (Premium UI Version)
+-- Moon Project 🌑 V3.5 (Full Customization)
 local Players = game:GetService("Players")
 local LPlayer = Players.LocalPlayer
 local PlayerGui = LPlayer:WaitForChild("PlayerGui")
 local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 if PlayerGui:FindFirstChild("MoonV3_Final") then PlayerGui.MoonV3_Final:Destroy() end
 
@@ -10,155 +11,155 @@ local MoonGui = Instance.new("ScreenGui", PlayerGui)
 MoonGui.Name = "MoonV3_Final"
 MoonGui.ResetOnSpawn = false
 
--- 1. ИКОНКА (Месяц и звезды)
+-- ПЕРЕМЕННЫЕ ДЛЯ ФУНКЦИЙ
+local SpeedValue = 16
+local FlySpeed = 50
+local Flying = false
+
+-- 1. ИКОНКА ОТКРЫТИЯ (Месяц)
 local OpenBtn = Instance.new("ImageButton", MoonGui)
 OpenBtn.Size = UDim2.new(0, 60, 0, 60)
 OpenBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 60)
-OpenBtn.Image = "rbxassetid://605124567" -- Иконка месяца
+OpenBtn.Image = "rbxassetid://605124567" 
 OpenBtn.Active = true
 OpenBtn.Draggable = true
-local BtnCorner = Instance.new("UICorner", OpenBtn)
-BtnCorner.CornerRadius = UDim.new(1, 0)
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
+
+local MoonLabel = Instance.new("TextLabel", OpenBtn) -- Запасной месяц если ID не сработает
+MoonLabel.Size = UDim2.new(1,0,1,0)
+MoonLabel.Text = "🌙"
+MoonLabel.BackgroundTransparency = 1
+MoonLabel.TextSize = 30
+MoonLabel.TextColor3 = Color3.new(1,1,1)
 
 -- 2. ГЛАВНОЕ ОКНО
 local Main = Instance.new("Frame", MoonGui)
 Main.Name = "Main"
-Main.Size = UDim2.new(0, 400, 0, 300)
-Main.Position = UDim2.new(0.5, -200, 0.5, -150)
+Main.Size = UDim2.new(0, 350, 0, 380)
+Main.Position = UDim2.new(0.5, -175, 0.5, -190)
 Main.BackgroundColor3 = Color3.fromRGB(15, 18, 28)
 Main.Visible = false
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
+Main.Active = true
+Main.Draggable = true -- Теперь меню можно перемещать!
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 15)
 
--- Фон со звездами (через прозрачность)
-local StarsBg = Instance.new("Frame", Main)
-StarsBg.Size = UDim2.new(1, 0, 1, 0)
-StarsBg.BackgroundTransparency = 1
-for i = 1, 40 do
-    local s = Instance.new("Frame", StarsBg)
-    s.Size = UDim2.new(0, 2, 0, 2)
-    s.Position = UDim2.new(math.random(), 0, math.random(), 0)
-    s.BackgroundColor3 = Color3.new(1, 1, 1)
-    s.BackgroundTransparency = 0.5
-    Instance.new("UICorner", s).CornerRadius = UDim.new(1, 0)
-end
-
--- ВЕРХНЯЯ ПАНЕЛЬ (Tabs)
-local TopBar = Instance.new("Frame", Main)
-TopBar.Size = UDim2.new(1, 0, 0, 45)
-TopBar.BackgroundTransparency = 1
-
-local Title = Instance.new("TextLabel", TopBar)
-Title.Size = UDim2.new(0, 150, 1, 0)
-Title.Position = UDim2.new(0, 15, 0, 0)
-Title.Text = "moon project 🌑"
-Title.TextColor3 = Color3.new(1, 1, 1)
+-- ПЕРЕЛИВАЮЩИЙСЯ ЗАГОЛОВОК (RGB/Black-White)
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 60)
+Title.Text = "MOON PROJECT 🌑"
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
-Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextSize = 26
 Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.new(1, 1, 1)
 
-local CloseBtn = Instance.new("TextButton", TopBar)
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -40, 0.5, -15)
+spawn(function()
+    while task.wait() do
+        local t = tick()
+        local color = math.sin(t * 2) * 0.5 + 0.5 -- Плавный переход 0 к 1
+        Title.TextColor3 = Color3.new(color, color, color) -- Перелив от черного к белому
+    end
+end)
+
+local CloseBtn = Instance.new("TextButton", Main)
+CloseBtn.Size = UDim2.new(0, 35, 0, 35)
+CloseBtn.Position = UDim2.new(1, -40, 0, 10)
 CloseBtn.Text = "✕"
 CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 CloseBtn.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", CloseBtn)
 
--- ВКЛАДКИ
-local Tabs = Instance.new("Frame", Main)
-Tabs.Size = UDim2.new(1, -20, 0, 35)
-Tabs.Position = UDim2.new(0, 10, 0, 50)
-Tabs.BackgroundTransparency = 1
-local TabList = Instance.new("UIListLayout", Tabs)
-TabList.FillDirection = Enum.FillDirection.Horizontal
-TabList.Padding = UDim.new(0, 10)
-
--- КОНТЕНТ (Scrolling Frame)
 local Content = Instance.new("ScrollingFrame", Main)
-Content.Size = UDim2.new(1, -20, 1, -100)
-Content.Position = UDim2.new(0, 10, 0, 95)
+Content.Size = UDim2.new(1, -20, 1, -80)
+Content.Position = UDim2.new(0, 10, 0, 70)
 Content.BackgroundTransparency = 1
 Content.ScrollBarThickness = 2
 local ContentList = Instance.new("UIListLayout", Content)
-ContentList.Padding = UDim.new(0, 8)
+ContentList.Padding = UDim.new(0, 10)
 
--- ФУНКЦИЯ СОЗДАНИЯ ТУМБЛЕРА (Toggle)
-local function CreateToggle(name, callback)
+-- ФУНКЦИЯ СОЗДАНИЯ СЛАЙДЕРА (Slider)
+local function CreateSlider(name, min, max, default, callback)
     local Frame = Instance.new("Frame", Content)
-    Frame.Size = UDim2.new(1, -10, 0, 40)
+    Frame.Size = UDim2.new(1, -10, 0, 60)
     Frame.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
     Instance.new("UICorner", Frame)
 
-    local Text = Instance.new("TextLabel", Frame)
-    Text.Size = UDim2.new(1, -60, 1, 0)
-    Text.Position = UDim2.new(0, 15, 0, 0)
-    Text.Text = name
-    Text.TextColor3 = Color3.new(0.8, 0.8, 0.8)
-    Text.BackgroundTransparency = 1
-    Text.TextXAlignment = Enum.TextXAlignment.Left
-    Text.Font = Enum.Font.Gotham
+    local Label = Instance.new("TextLabel", Frame)
+    Label.Size = UDim2.new(1, 0, 0, 30)
+    Label.Text = name .. ": " .. default
+    Label.TextColor3 = Color3.new(1, 1, 1)
+    Label.BackgroundTransparency = 1
+    
+    local SliderBar = Instance.new("Frame", Frame)
+    SliderBar.Size = UDim2.new(0.8, 0, 0, 6)
+    SliderBar.Position = UDim2.new(0.1, 0, 0.7, 0)
+    SliderBar.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
+    
+    local SliderDot = Instance.new("TextButton", SliderBar)
+    SliderDot.Size = UDim2.new(0, 16, 0, 16)
+    SliderDot.Position = UDim2.new((default-min)/(max-min), -8, 0.5, -8)
+    SliderDot.Text = ""
+    SliderDot.BackgroundColor3 = Color3.new(1,1,1)
+    Instance.new("UICorner", SliderDot).CornerRadius = UDim.new(1,0)
 
-    local Switch = Instance.new("TextButton", Frame)
-    Switch.Size = UDim2.new(0, 45, 0, 24)
-    Switch.Position = UDim2.new(1, -55, 0.5, -12)
-    Switch.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
-    Switch.Text = ""
-    local SwCorner = Instance.new("UICorner", Switch)
-    SwCorner.CornerRadius = UDim.new(1, 0)
-
-    local Dot = Instance.new("Frame", Switch)
-    Dot.Size = UDim2.new(0, 18, 0, 18)
-    Dot.Position = UDim2.new(0, 3, 0.5, -9)
-    Dot.BackgroundColor3 = Color3.new(1, 1, 1)
-    Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
-
-    local toggled = false
-    Switch.MouseButton1Click:Connect(function()
-        toggled = not toggled
-        Switch.BackgroundColor3 = toggled and Color3.fromRGB(50, 200, 100) or Color3.fromRGB(40, 45, 60)
-        Dot:TweenPosition(toggled and UDim2.new(0, 24, 0.5, -9) or UDim2.new(0, 3, 0.5, -9), "Out", "Quad", 0.2)
-        callback(toggled)
+    SliderDot.MouseButton1Down:Connect(function()
+        local MoveConn
+        MoveConn = UIS.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                local relativeX = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
+                SliderDot.Position = UDim2.new(relativeX, -8, 0.5, -8)
+                local value = math.floor(min + (max - min) * relativeX)
+                Label.Text = name .. ": " .. value
+                callback(value)
+            end
+        end)
+        UIS.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                if MoveConn then MoveConn:Disconnect() end
+            end
+        end)
     end)
 end
 
--- === САМИ ЧИТЫ ===
+-- === ЧИТЫ ===
 
-CreateToggle("Speed Hack (100)", function(state)
-    LPlayer.Character.Humanoid.WalkSpeed = state and 100 or 16
-end)
-
-CreateToggle("Infinite Jump", function(state)
-    _G.InfJump = state
-    UIS.JumpRequest:Connect(function()
-        if _G.InfJump then LPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping") end
-    end)
-end)
-
-CreateToggle("ESP Players", function(state)
-    for _, v in pairs(Players:GetPlayers()) do
-        if v ~= LPlayer and v.Character then
-            if state then
-                local h = Instance.new("Highlight", v.Character)
-                h.Name = "MoonHighlight"
-                h.FillColor = Color3.fromRGB(100, 100, 255)
-            else
-                if v.Character:FindFirstChild("MoonHighlight") then v.Character.MoonHighlight:Destroy() end
-            end
-        end
+-- Speed Slider
+CreateSlider("WalkSpeed", 16, 300, 16, function(v)
+    SpeedValue = v
+    if LPlayer.Character and LPlayer.Character:FindFirstChild("Humanoid") then
+        LPlayer.Character.Humanoid.WalkSpeed = v
     end
 end)
 
-CreateToggle("Fly (Low G)", function(state)
-    local hrp = LPlayer.Character.HumanoidRootPart
-    if state then
-        local bv = Instance.new("BodyVelocity", hrp)
+-- Fly Slider & Toggle
+CreateSlider("Fly Speed", 10, 500, 50, function(v)
+    FlySpeed = v
+end)
+
+local FlyToggle = Instance.new("TextButton", Content)
+FlyToggle.Size = UDim2.new(1, -10, 0, 40)
+FlyToggle.Text = "Toggle Fly: OFF"
+FlyToggle.BackgroundColor3 = Color3.fromRGB(40, 50, 80)
+FlyToggle.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", FlyToggle)
+
+FlyToggle.MouseButton1Click:Connect(function()
+    Flying = not Flying
+    FlyToggle.Text = "Toggle Fly: " .. (Flying and "ON" or "OFF")
+    FlyToggle.BackgroundColor3 = Flying and Color3.fromRGB(50, 150, 100) or Color3.fromRGB(40, 50, 80)
+    
+    if Flying then
+        local bv = Instance.new("BodyVelocity", LPlayer.Character.HumanoidRootPart)
         bv.Name = "MoonFly"
-        bv.MaxForce = Vector3.new(0, 1e6, 0)
-        bv.Velocity = Vector3.new(0, 0.5, 0)
-    else
-        if hrp:FindFirstChild("MoonFly") then hrp.MoonFly:Destroy() end
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        
+        spawn(function()
+            while Flying do
+                bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * FlySpeed
+                task.wait()
+            end
+            bv:Destroy()
+        end)
     end
 end)
 
@@ -173,4 +174,8 @@ CloseBtn.MouseButton1Click:Connect(function()
     OpenBtn.Visible = true
 end)
 
-print("Moon Project V3: UI Loaded!")
+RunService.RenderStepped:Connect(function()
+    if LPlayer.Character and LPlayer.Character:FindFirstChild("Humanoid") then
+        LPlayer.Character.Humanoid.WalkSpeed = SpeedValue
+    end
+end)
