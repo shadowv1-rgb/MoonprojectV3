@@ -1,6 +1,5 @@
-```lua
 -- LocalScript для создания GUI в Roblox
--- Обновленный скрипт: добавлены разделы "main" и "settings", функции fly, infinity jump, esp с подфункциями (boxes, nametag, tracers, esp color white), speed hack, anti afk, boost fps, с ползунками для скоростей
+-- Полный скрипт с разделами main и settings, функциями fly, infinity jump, ESP (boxes, nametag, tracers, esp color white), speed hack, anti AFK, boost FPS
 
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -16,7 +15,7 @@ iconButton.Name = "BananaIcon"
 iconButton.Size = UDim2.new(0, 50, 0, 50)  -- Размер 50x50
 iconButton.Position = UDim2.new(0.9, -25, 0.1, -25)  -- Позиция в правом верхнем углу
 iconButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)  -- Белый фон (кружок)
-iconButton.Image = "rbxassetid://123456789"  -- Изображение банана (замените на реальный ID, например, из Roblox Toolbox - поиск "banana" для "нарисованного" вида)
+iconButton.Image = "rbxassetid://123456789"  -- Изображение банана (замените на реальный ID)
 iconButton.BackgroundTransparency = 0
 iconButton.BorderSizePixel = 4  -- Толстая черная обводка
 iconButton.BorderColor3 = Color3.fromRGB(0, 0, 0)  -- Черная обводка
@@ -95,7 +94,7 @@ bananaImage.Name = "BananaImage"
 bananaImage.Size = UDim2.new(0.1, 0, 0.08, 0)  -- Размер для нарисованного банана
 bananaImage.Position = UDim2.new(0.55, 0, 0.05, 0)  -- Рядом с надписью
 bananaImage.BackgroundTransparency = 1
-bananaImage.Image = "rbxassetid://123456789"  -- То же изображение банана (замените на реальный ID для "нарисованного" вида)
+bananaImage.Image = "rbxassetid://123456789"  -- То же изображение банана
 bananaImage.Parent = menuFrame
 
 -- Раздел "main" под надписью (серый, обведенный)
@@ -200,7 +199,7 @@ local espEnabled = false
 espButton.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     espButton.Text = espEnabled and "ESP: ON" or "ESP: OFF"
-    -- Логика ESP будет ниже
+    -- Логика ESP: включение boxes, nametag, tracers если они ON
 end)
 
 -- Boxes (под ESP)
@@ -327,16 +326,4 @@ antiAfkButton.Parent = menuFrame
 local antiAfkEnabled = false
 antiAfkButton.MouseButton1Click:Connect(function()
     antiAfkEnabled = not antiAfkEnabled
-    antiAfkButton.Text = antiAfkEnabled and "Anti AFK: ON" or "Anti AFK: OFF"
-end)
-
--- Раздел "settings" (справа от main)
-local settingsSection = Instance.new("TextLabel")
-settingsSection.Name = "SettingsSection"
-settingsSection.Size = UDim2.new(0.3, 0, 0.08, 0)  -- Размер
-settingsSection.Position = UDim2.new(0.55, 0, 0.15, 0)  -- Справа от main
-settingsSection.BackgroundColor3 = Color3.fromRGB(128, 128, 128)  -- Серый цвет
-settingsSection.BackgroundTransparency = 0
-settingsSection.BorderSizePixel = 2
-settingsSection.BorderColor3 = Color3.fromRGB(0, 0, 0)  -- Обводка
-settings
+    antiAfk
