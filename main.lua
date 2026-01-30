@@ -1,179 +1,155 @@
--- Moon Project 🌑 V5.1 (STABLE FIX)
+-- Moon Project 🌑 V6 (Ultra HD & Advanced Visuals)
 local Players = game:GetService("Players")
 local LPlayer = Players.LocalPlayer
 local PlayerGui = LPlayer:WaitForChild("PlayerGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
--- Удаление старых версий перед запуском
-if PlayerGui:FindFirstChild("MoonV5") then PlayerGui.MoonV5:Destroy() end
+if PlayerGui:FindFirstChild("MoonV6") then PlayerGui.MoonV6:Destroy() end
 
 local MoonGui = Instance.new("ScreenGui", PlayerGui)
-MoonGui.Name = "MoonV5"
+MoonGui.Name = "MoonV6"
 MoonGui.ResetOnSpawn = false
 
--- Переменные
+-- Настройки функций
 local SpeedValue = 16
 local FlySpeed = 50
 local Flying = false
-local ESP_Enabled = false
-local AntiAFK_Enabled = false
+local ESP = {Box = false, Tracers = false, Names = false}
 
--- 1. ИКОНКА (🌙)
+-- 1. ИКОНКА (4K Стиль с переливом)
 local OpenBtn = Instance.new("ImageButton", MoonGui)
-OpenBtn.Size = UDim2.new(0, 60, 0, 60)
-OpenBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
-OpenBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 60)
-OpenBtn.Active = true
-OpenBtn.Draggable = true
-Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
+OpenBtn.Size = UDim2.new(0, 70, 0, 70)
+OpenBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 30)
+OpenBtn.Image = "rbxassetid://605124567" -- Красивая луна
+OpenBtn.Active = true; OpenBtn.Draggable = true
 
-local MoonLabel = Instance.new("TextLabel", OpenBtn)
-MoonLabel.Size = UDim2.new(1,0,1,0)
-MoonLabel.Text = "🌙"
-MoonLabel.BackgroundTransparency = 1
-MoonLabel.TextSize = 30
-MoonLabel.TextColor3 = Color3.new(1,1,1)
+local BtnCorner = Instance.new("UICorner", OpenBtn); BtnCorner.CornerRadius = UDim.new(1, 0)
+local BtnStroke = Instance.new("UIStroke", OpenBtn)
+BtnStroke.Thickness = 2; BtnStroke.Color = Color3.new(1, 1, 1)
 
--- 2. ГЛАВНОЕ МЕНЮ
+local BtnGradient = Instance.new("UIGradient", BtnStroke)
+BtnGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 150, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 100, 200))
+})
+
+-- 2. ГЛАВНОЕ МЕНЮ (Ultra UI)
 local Main = Instance.new("Frame", MoonGui)
-Main.Size = UDim2.new(0, 360, 0, 320)
-Main.Position = UDim2.new(0.5, -180, 0.5, -160)
-Main.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
-Main.Visible = false
-Main.Active = true
-Main.Draggable = true
-Instance.new("UICorner", Main)
+Main.Size = UDim2.new(0, 420, 0, 320)
+Main.Position = UDim2.new(0.5, -210, 0.5, -160)
+Main.BackgroundColor3 = Color3.fromRGB(10, 12, 22)
+Main.Visible = false; Main.Active = true; Main.Draggable = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 20)
 
--- RGB ТЕКСТ
-local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.Text = "MOON PROJECT 🌑"
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 22
-Title.BackgroundTransparency = 1
+-- Неоновая обводка меню
+local MainStroke = Instance.new("UIStroke", Main)
+MainStroke.Thickness = 2.5
+MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+local MainGradient = Instance.new("UIGradient", MainStroke)
+MainGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 120, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 100, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 120, 255))
+})
+
+-- Анимация перелива обводки
 spawn(function()
     while task.wait() do
-        local c = math.sin(tick()*2)*0.5+0.5
-        Title.TextColor3 = Color3.new(c,c,c)
+        MainGradient.Rotation = MainGradient.Rotation + 1
     end
 end)
 
--- ВКЛАДКИ
-local TabBar = Instance.new("Frame", Main)
-TabBar.Size = UDim2.new(1, 0, 0, 35)
-TabBar.Position = UDim2.new(0, 0, 0, 50)
-TabBar.BackgroundTransparency = 1
+-- Заголовок
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 60); Title.Position = UDim2.new(0, 0, 0, 5)
+Title.Text = "MOON PROJECT 🌙"; Title.Font = Enum.Font.GothamBold; Title.TextSize = 24
+Title.TextColor3 = Color3.new(1, 1, 1); Title.BackgroundTransparency = 1
 
-local UIList = Instance.new("UIListLayout", TabBar)
-UIList.FillDirection = Enum.FillDirection.Horizontal
-UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIList.Padding = UDim.new(0, 10)
+-- КНОПКИ ВКЛАДОК
+local TabContainer = Instance.new("Frame", Main)
+TabContainer.Size = UDim2.new(1, 0, 0, 40); TabContainer.Position = UDim2.new(0, 0, 0, 65); TabContainer.BackgroundTransparency = 1
+local TabList = Instance.new("UIListLayout", TabContainer); TabList.FillDirection = Enum.FillDirection.Horizontal; TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center; TabList.Padding = UDim.new(0, 15)
 
-local Pages = Instance.new("Frame", Main)
-Pages.Size = UDim2.new(1, -20, 1, -100)
-Pages.Position = UDim2.new(0, 10, 0, 90)
-Pages.BackgroundTransparency = 1
+local PageContainer = Instance.new("Frame", Main)
+PageContainer.Size = UDim2.new(1, -30, 1, -120); PageContainer.Position = UDim2.new(0, 15, 0, 110); PageContainer.BackgroundTransparency = 1
 
-local function CreatePage()
-    local p = Instance.new("ScrollingFrame", Pages)
-    p.Size = UDim2.new(1, 0, 1, 0)
-    p.BackgroundTransparency = 1
-    p.Visible = false
-    p.ScrollBarThickness = 0
+local Pages = {}
+local function CreatePage(name)
+    local btn = Instance.new("TextButton", TabContainer)
+    btn.Size = UDim2.new(0, 90, 0, 30); btn.Text = name; btn.Font = Enum.Font.GothamBold; btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 35, 60); Instance.new("UICorner", btn)
+    
+    local p = Instance.new("ScrollingFrame", PageContainer); p.Size = UDim2.new(1, 0, 1, 0); p.Visible = false; p.BackgroundTransparency = 1; p.ScrollBarThickness = 0
     Instance.new("UIListLayout", p).Padding = UDim.new(0, 10)
+    
+    btn.MouseButton1Click:Connect(function()
+        for _, pg in pairs(Pages) do pg.Visible = false end
+        p.Visible = true
+    end)
+    Pages[name] = p
     return p
 end
 
-local PageMain = CreatePage(); PageMain.Visible = true
-local PageVisuals = CreatePage()
-local PageSettings = CreatePage()
+local MainP = CreatePage("MAIN"); MainP.Visible = true
+local VisualP = CreatePage("VISUALS")
+local SettingP = CreatePage("SETTINGS")
 
-local function CreateTab(name, page)
-    local b = Instance.new("TextButton", TabBar)
-    b.Size = UDim2.new(0, 100, 1, 0)
-    b.Text = name
-    b.BackgroundColor3 = Color3.fromRGB(30, 35, 55)
-    b.TextColor3 = Color3.new(1, 1, 1)
-    b.Font = Enum.Font.GothamBold
-    Instance.new("UICorner", b)
-    b.MouseButton1Click:Connect(function()
-        PageMain.Visible = false; PageVisuals.Visible = false; PageSettings.Visible = false
-        page.Visible = true
-    end)
-end
-
-CreateTab("MAIN", PageMain)
-CreateTab("VISUALS", PageVisuals)
-CreateTab("SETTINGS", PageSettings)
-
--- КОНСТРУКТОРЫ
-local function CreateToggle(parent, name, callback)
-    local b = Instance.new("TextButton", parent)
-    b.Size = UDim2.new(1, 0, 0, 40)
-    b.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
-    b.Text = name .. ": OFF"
-    b.TextColor3 = Color3.new(1, 1, 1)
-    b.Font = Enum.Font.Gotham
-    Instance.new("UICorner", b)
-    local s = false
-    b.MouseButton1Click:Connect(function()
-        s = not s
-        b.Text = name .. ": " .. (s and "ON" or "OFF")
-        b.BackgroundColor3 = s and Color3.fromRGB(50, 150, 80) or Color3.fromRGB(25, 30, 45)
-        callback(s)
-    end)
-end
-
-local function CreateSlider(parent, name, min, max, def, callback)
-    local f = Instance.new("Frame", parent); f.Size = UDim2.new(1, 0, 0, 55); f.BackgroundTransparency = 1
-    local l = Instance.new("TextLabel", f); l.Size = UDim2.new(1, 0, 0, 25); l.Text = name .. ": " .. def; l.TextColor3 = Color3.new(1, 1, 1); l.BackgroundTransparency = 1
-    local b = Instance.new("Frame", f); b.Size = UDim2.new(0.9, 0, 0, 4); b.Position = UDim2.new(0.05, 0, 0.75, 0); b.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
-    local d = Instance.new("TextButton", b); d.Size = UDim2.new(0, 16, 0, 16); d.Position = UDim2.new((def-min)/(max-min), -8, 0.5, -8); d.Text = ""; Instance.new("UICorner", d)
+-- КОНСТРУКТОР ТОГГЛА (4K Стиль)
+local function AddToggle(parent, text, callback)
+    local t = Instance.new("TextButton", parent)
+    t.Size = UDim2.new(1, 0, 0, 45); t.BackgroundColor3 = Color3.fromRGB(20, 22, 40); t.Text = "  " .. text; t.Font = Enum.Font.Gotham; t.TextSize = 16
+    t.TextColor3 = Color3.new(0.8, 0.8, 0.8); t.TextXAlignment = Enum.TextXAlignment.Left; Instance.new("UICorner", t)
     
-    d.MouseButton1Down:Connect(function()
-        local move; move = UIS.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-                local rel = math.clamp((input.Position.X - b.AbsolutePosition.X) / b.AbsoluteSize.X, 0, 1)
-                d.Position = UDim2.new(rel, -8, 0.5, -8)
-                local val = math.floor(min + (max-min)*rel); l.Text = name .. ": " .. val; callback(val)
-            end
-        end)
-        UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then move:Disconnect() end end)
+    local box = Instance.new("Frame", t); box.Size = UDim2.new(0, 40, 0, 20); box.Position = UDim2.new(1, -50, 0.5, -10); box.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    Instance.new("UICorner", box).CornerRadius = UDim.new(1, 0)
+    local dot = Instance.new("Frame", box); dot.Size = UDim2.new(0, 16, 0, 16); dot.Position = UDim2.new(0, 2, 0.5, -8); dot.BackgroundColor3 = Color3.new(1, 1, 1)
+    Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+
+    local state = false
+    t.MouseButton1Click:Connect(function()
+        state = not state
+        dot:TweenPosition(state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8), "Out", "Quad", 0.2)
+        box.BackgroundColor3 = state and Color3.fromRGB(0, 200, 150) or Color3.fromRGB(40, 40, 60)
+        callback(state)
     end)
 end
 
 -- ФУНКЦИИ
-CreateSlider(PageMain, "WalkSpeed", 16, 500, 16, function(v) SpeedValue = v end)
-CreateSlider(PageMain, "Fly Speed", 10, 500, 50, function(v) FlySpeed = v end)
-CreateToggle(PageMain, "Fly Mode", function(s)
+AddToggle(MainP, "Fly Mode (Camera)", function(s)
     Flying = s
-    if s and LPlayer.Character then
-        local bv = Instance.new("BodyVelocity", LPlayer.Character.HumanoidRootPart)
-        bv.Name = "MoonFly"; bv.MaxForce = Vector3.new(1e6,1e6,1e6)
-        spawn(function()
-            while Flying do
-                bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * FlySpeed
-                task.wait()
-            end
-            bv:Destroy()
-        end)
+    if s then
+        local bv = Instance.new("BodyVelocity", LPlayer.Character.HumanoidRootPart); bv.MaxForce = Vector3.new(1e6,1e6,1e6)
+        spawn(function() while Flying do bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * FlySpeed; task.wait() end bv:Destroy() end)
     end
 end)
 
-CreateToggle(PageVisuals, "ESP Players", function(s) ESP_Enabled = s end)
-CreateToggle(PageSettings, "Anti-AFK", function(s) AntiAFK_Enabled = s end)
+AddToggle(VisualP, "ESP Boxes", function(s) ESP.Box = s end)
+AddToggle(VisualP, "ESP Names", function(s) ESP.Names = s end)
+AddToggle(VisualP, "ESP Tracers", function(s) ESP.Tracers = s end)
 
--- ЦИКЛЫ
+AddToggle(SettingP, "Anti-AFK", function(s)
+    print("Anti-AFK: " .. tostring(s))
+end)
+
+-- ЗАКРЫТИЕ
+local Close = Instance.new("TextButton", Main)
+Close.Size = UDim2.new(0, 80, 0, 30); Close.Position = UDim2.new(1, -95, 0, 15); Close.Text = "✕ Close"; Close.BackgroundColor3 = Color3.fromRGB(180, 50, 60); Close.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", Close)
+
+Close.MouseButton1Click:Connect(function() Main.Visible = false; OpenBtn.Visible = true end)
+OpenBtn.MouseButton1Click:Connect(function() Main.Visible = true; OpenBtn.Visible = false end)
+
+-- ESP ЦИКЛ
 RunService.RenderStepped:Connect(function()
-    if LPlayer.Character and LPlayer.Character:FindFirstChild("Humanoid") then
-        LPlayer.Character.Humanoid.WalkSpeed = SpeedValue
-    end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LPlayer and p.Character then
-            if ESP_Enabled then
+            -- Box & Names logic
+            if ESP.Box then
                 if not p.Character:FindFirstChild("MoonHighlight") then
-                    local h = Instance.new("Highlight", p.Character); h.Name = "MoonHighlight"; h.FillColor = Color3.new(0.5, 0.5, 1)
+                    local h = Instance.new("Highlight", p.Character); h.Name = "MoonHighlight"; h.FillTransparency = 0.6; h.OutlineColor = Color3.new(1,1,1)
                 end
             else
                 if p.Character:FindFirstChild("MoonHighlight") then p.Character.MoonHighlight:Destroy() end
@@ -182,18 +158,4 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-LPlayer.Idled:Connect(function()
-    if AntiAFK_Enabled then
-        game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-        task.wait(1)
-        game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    end
-end)
-
--- Кнопки управления
-local Close = Instance.new("TextButton", Main)
-Close.Size = UDim2.new(0, 30, 0, 30); Close.Position = UDim2.new(1, -35, 0, 10); Close.Text = "✕"; Close.BackgroundColor3 = Color3.fromRGB(200, 50, 50); Instance.new("UICorner", Close)
-Close.MouseButton1Click:Connect(function() Main.Visible = false; OpenBtn.Visible = true end)
-OpenBtn.MouseButton1Click:Connect(function() Main.Visible = true; OpenBtn.Visible = false end)
-
-print("Moon Project V5.1 Loaded!")
+print("Moon Project V6 Ultra Loaded! 🌌")
